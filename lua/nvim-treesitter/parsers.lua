@@ -12,6 +12,15 @@ list.javascript = {
   maintainers = {"@steelsojka"},
 }
 
+list.biber = {
+  install_info = {
+    url = "https://github.com/Aerijo/tree-sitter-biber",
+    files = { "src/parser.c" }
+  },
+  filetype = 'bib',
+  maintainers = {"@chrbau2711"},
+}
+
 list.c = {
   install_info = {
     url = "https://github.com/tree-sitter/tree-sitter-c",
