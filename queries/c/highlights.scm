@@ -1,3 +1,5 @@
+(identifier) @variable
+
 [
   "const"
   "default"
@@ -37,9 +39,10 @@
   "#else"
   "#elif"
   "#endif"
-  "#include"
   (preproc_directive)
 ] @keyword
+
+"#include" @include
 
 [
   "="

@@ -18,7 +18,9 @@ function M.iter_cmd(cmd_list, i, lang, success_message)
 
   handle = luv.spawn(attr.cmd, attr.opts, vim.schedule_wrap(function(code)
     handle:close()
-    if code ~= 0 then return api.nvim_err_writeln(attr.err) end
+    if code ~= 0 then
+      return api.nvim_err_writeln(attr.err or ("Failed to execute the following command:\n"..vim.inspect(attr)))
+    end
     M.iter_cmd(cmd_list, i + 1, lang, success_message)
   end))
 end
@@ -47,9 +49,10 @@ local function iter_cmd_sync(cmd_list)
       print(cmd.info)
     end
 
-    vim.fn.system(get_command(cmd))
+    local ret = vim.fn.system(get_command(cmd))
     if vim.v.shell_error ~= 0 then
-      api.nvim_err_writeln(cmd.err)
+      print(ret)
+      api.nvim_err_writeln((cmd.err..'\n' or '').."Failed to execute the following command:\n"..vim.inspect(cmd))
       return false
     end
 
@@ -102,7 +105,7 @@ local function select_mv_cmd(compile_location, parser_lib_name)
     return {
       cmd = 'cmd',
       opts = {
-        args = { '/C', 'move', compile_location..'\\parser.so', parser_lib_name },
+        args = { '/C', 'move', '/Y', compile_location..'\\parser.so', parser_lib_name },
       }
     }
   else
@@ -115,18 +118,15 @@ local function select_mv_cmd(compile_location, parser_lib_name)
   end
 end
 
-local function run_install(cache_folder, package_path, lang, repo, with_sync)
+local function run_install(cache_folder, install_folder, lang, repo, with_sync)
   parsers.reset_cache()
 
-  local path_sep = '/'
-  if fn.has('win32') == 1 then
-    path_sep = '\\'
-  end
+  local path_sep = utils.get_path_sep()
 
   local project_name = 'tree-sitter-'..lang
   -- compile_location only needed for typescript installs.
   local compile_location = cache_folder..path_sep..(repo.location or project_name)
-  local parser_lib_name = package_path..path_sep.."parser"..path_sep..lang..".so"
+  local parser_lib_name = install_folder..path_sep..lang..".so"
 
   local compilers = { "cc", "gcc", "clang" }
   local cc = select_executable(compilers)
@@ -168,7 +168,7 @@ local function run_install(cache_folder, package_path, lang, repo, with_sync)
   end
 end
 
-local function install_lang(lang, ask_reinstall, cache_folder, package_path, with_sync)
+local function install_lang(lang, ask_reinstall, cache_folder, install_folder, with_sync)
   if #api.nvim_get_runtime_file('parser/'..lang..'.so', false) > 0 then
     if ask_reinstall ~= 'force' then
       if not ask_reinstall then return end
@@ -190,7 +190,7 @@ local function install_lang(lang, ask_reinstall, cache_folder, package_path, wit
     files={ install_info.files, 'table' }
   }
 
-  run_install(cache_folder, package_path, lang, install_info, with_sync)
+  run_install(cache_folder, install_folder, lang, install_info, with_sync)
 end
 
 local function install(with_sync, ask_reinstall)
@@ -200,10 +200,10 @@ local function install(with_sync, ask_reinstall)
       return api.nvim_err_writeln('Git is required on your system to run this command')
     end
 
-    local package_path, err = utils.get_package_path()
+    local cache_folder, err = utils.get_cache_dir()
     if err then return api.nvim_err_writeln(err) end
 
-    local cache_folder, err = utils.get_cache_dir()
+    local install_folder, err = utils.get_parser_install_dir()
     if err then return api.nvim_err_writeln(err) end
 
     local languages
@@ -217,7 +217,7 @@ local function install(with_sync, ask_reinstall)
     end
 
     for _, lang in ipairs(languages) do
-      install_lang(lang, ask, cache_folder, package_path, with_sync)
+      install_lang(lang, ask, cache_folder, install_folder, with_sync)
     end
   end
 end
@@ -267,12 +267,10 @@ function M.uninstall(lang)
       M.uninstall(lang)
     end
   elseif lang then
-    local package_path, err = utils.get_package_path()
-    if err then
-      print(err)
-      return
-    end
-    local parser_lib = package_path..path_sep.."parser"..path_sep..lang..".so"
+    local install_dir, err = utils.get_parser_install_dir()
+    if err then return api.nvim_err_writeln(err) end
+
+    local parser_lib = install_dir..path_sep..lang..".so"
 
     local command_list = {
       select_uninstall_rm_cmd(lang, parser_lib)

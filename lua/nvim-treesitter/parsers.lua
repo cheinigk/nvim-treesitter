@@ -83,7 +83,7 @@ list.bash = {
     url = "https://github.com/tree-sitter/tree-sitter-bash",
     files = { "src/parser.c", "src/scanner.cc" },
   },
-  used_by = { "zsh" },
+  used_by = { "zsh", "PKGBUILD" },
   filetype = 'sh',
   maintainers = {"@TravonteD"},
 }
@@ -139,8 +139,19 @@ list.ocaml = {
   install_info = {
     url = "https://github.com/tree-sitter/tree-sitter-ocaml",
     files = { "src/parser.c", "src/scanner.cc" },
+    location = "tree-sitter-ocaml/ocaml"
   },
   maintainers = {'@undu'},
+}
+
+list.ocaml_interface = {
+  install_info = {
+    url = "https://github.com/tree-sitter/tree-sitter-ocaml",
+    files = { "src/parser.c", "src/scanner.cc" },
+    location = "tree-sitter-ocaml_interface/interface"
+  },
+  maintainers = {'@undu'},
+  filetype = 'ocamlinterface'
 }
 
 list.swift = {
@@ -340,8 +351,7 @@ end
 M.reset_cache()
 
 function M.has_parser(lang)
-  local buf = api.nvim_get_current_buf()
-  local lang = lang or M.get_buf_lang(buf)
+  local lang = lang or M.get_buf_lang(api.nvim_get_current_buf())
 
   if not lang or #lang == 0 then return false end
   return #parser_files[lang] > 0
@@ -377,5 +387,3 @@ function M.get_buf_lang(bufnr)
 end
 
 return M
-
-

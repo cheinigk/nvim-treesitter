@@ -1,8 +1,10 @@
+; Variables
+(identifier) @variable
+
 ; Keywords
 
 [
  "alias"
- "and"
  "begin"
  "break"
  "class"
@@ -10,16 +12,20 @@
  "do"
  "end"
  "ensure"
- "in"
  "module"
  "next"
- "or"
  "rescue"
  "retry"
  "return"
  "then"
  "yield"
  ] @keyword
+
+[
+ "and"
+ "or"
+ "in"
+] @keyword.operator
 
 [
  "case"
@@ -36,20 +42,21 @@
  "while"
  ] @repeat
 
+(constant) @constant
 
 ((identifier) @keyword
  (#vim-match? @keyword "^(private|protected|public)$"))
 
 ; Function calls
 
-((identifier) @function
- (#eq? @function "require"))
+((identifier) @include
+ (#vim-match? @include "^(require|require_relative|load)$"))
 
 "defined?" @function
 
 (call
   [
-   receiver: (constant) @constant
+   receiver: (constant) @type
    method: [
             (identifier)
             (constant)
@@ -58,7 +65,7 @@
 
 (method_call
   [
-   receiver: (constant) @constant
+   receiver: (constant) @type
    method: [
             (identifier)
             (constant)
@@ -80,7 +87,9 @@
                          (constant) @constant
                          ])
 
-(class name: (constant) @constant)
+(class name: (constant) @type)
+(module name: (constant) @type)
+(superclass (constant) @type)
 
 ; Identifiers
 [
@@ -94,12 +103,10 @@
 ((constant) @constant.macro
  (#vim-match? @constant.macro "^[A-Z\\d_]+$"))
 
-(constant) @constant
-
 [
  (self)
  (super)
- ] @constant.builtin
+ ] @variable.builtin
 
 (method_parameters (identifier) @parameter)
 (lambda_parameters (identifier) @parameter)
@@ -144,8 +151,8 @@
  ] @boolean
 
 (interpolation
-  "#{" @punctuation.bracket
-  "}" @punctuation.bracket) @embedded
+  "#{" @punctuation.special
+  "}" @punctuation.special) @embedded
 
 (comment) @comment
 

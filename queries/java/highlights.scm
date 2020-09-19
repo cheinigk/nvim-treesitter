@@ -1,7 +1,10 @@
 ; CREDITS @maxbrunsfeld (maxbrunsfeld@gmail.com)
 
-; Methods
+; Variables
 
+(identifier) @variable
+
+; Methods
 
 (method_declaration
   name: (identifier) @method)
@@ -105,7 +108,7 @@
 ((identifier) @constant
   (#vim-match? @constant "^_*[A-Z][A-Z\d_]+"))
 
-(this) @constant.builtin
+(this) @variable.builtin
 
 ; Literals
 
@@ -138,7 +141,6 @@
 "abstract"
 "assert"
 "break"
-"catch"
 "class"
 "continue"
 "default"
@@ -146,13 +148,11 @@
 "exports"
 "extends"
 "final"
-"finally"
 "implements"
 "instanceof"
 "interface"
 "module"
 "native"
-"new"
 "open"
 "opens"
 "package"
@@ -165,16 +165,17 @@
 "static"
 "strictfp"
 "synchronized"
-"throw"
-"throws"
 "to"
 "transient"
 "transitive"
-"try"
 "uses"
 "volatile"
 "with"
 ] @keyword
+
+[
+ "new"
+] @keyword.operator
 
 ; Conditionals
 
@@ -214,6 +215,16 @@
 "("
 ")"
 ] @punctuation.bracket
+
+; Exceptions
+
+[
+"throw"
+"throws"
+"finally"
+"try"
+"catch"
+] @exception
 
 ; Labels
 (labeled_statement

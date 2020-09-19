@@ -12,8 +12,8 @@ local folds_levels = utils.memoize_by_buf_tick(function(bufnr)
   local max_fold_level = api.nvim_win_get_option(0, 'foldnestmax')
 
   local matches
-  if query.has_fold(lang) then
-    matches = query.get_capture_matches(bufnr, "@fold", "fold")
+  if query.has_folds(lang) then
+    matches = query.get_capture_matches(bufnr, "@fold", "folds")
   elseif query.has_locals(lang) then
     matches = query.get_capture_matches(bufnr, "@scope", "locals")
   else

@@ -29,6 +29,7 @@ hlmap["number"] = "TSNumber"
 hlmap["boolean"] = "TSBoolean"
 hlmap["float"] = "TSFloat"
 hlmap["annotation"] = "TSAnnotation"
+hlmap["attribute"] = "TSAttribute"
 
 -- Functions
 hlmap["function"] = "TSFunction"
@@ -45,9 +46,10 @@ hlmap["constructor"] = "TSConstructor"
 hlmap["conditional"] = "TSConditional"
 hlmap["repeat"] = "TSRepeat"
 hlmap["label"] = "TSLabel"
-hlmap["operator"] = "TSOperator"
 hlmap["keyword"] = "TSKeyword"
 hlmap["keyword.function"] = "TSKeywordFunction"
+hlmap["keyword.operator"] = "TSKeywordOperator"
+hlmap["operator"] = "TSOperator"
 hlmap["exception"] = "TSException"
 
 hlmap["type"] = "TSType"
@@ -67,6 +69,12 @@ hlmap["text.underline"] = "TSUnderline"
 hlmap["text.title"] = "TSTitle"
 hlmap["text.literal"] = "TSLiteral"
 hlmap["text.uri"] = "TSURI"
+
+-- Tags
+hlmap["tag"] = "TSTag"
+hlmap["tag.delimiter"] = "TSTagDelimiter"
+
+hlmap["none"] = "TSNone"
 
 function M.attach(bufnr, lang)
   local lang = lang or parsers.get_buf_lang(bufnr)

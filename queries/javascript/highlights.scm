@@ -2,6 +2,10 @@
 
 ; Javascript
 
+; Variables
+;-----------
+(identifier) @variable
+
 ; Properties
 ;-----------
 
@@ -113,23 +117,36 @@
 "." @punctuation.delimiter
 "," @punctuation.delimiter
 
-"--" @operator
-"-" @operator
-"-=" @operator
-"&&" @operator
-"+" @operator
-"++" @operator
-"+=" @operator
-"<" @operator
-"<<" @operator
-"=" @operator
-"==" @operator
-"===" @operator
-"=>" @operator
-">" @operator
-">>" @operator
-"||" @operator
-"??" @operator
+[
+  "--"
+  "-"
+  "-="
+  "&&"
+  "+"
+  "++"
+  "+="
+  "&="
+  "/="
+  "**="
+  "<<="
+  "<"
+  "<="
+  "<<"
+  "="
+  "=="
+  "==="
+  "!="
+  "!=="
+  "=>"
+  ">"
+  ">="
+  ">>"
+  "||"
+  "%"
+  "%="
+] @operator
+
+(ternary_expression ["?" ":"] @operator)
 
 "(" @punctuation.bracket
 ")" @punctuation.bracket
@@ -167,30 +184,36 @@
 "async"
 "await"
 "break"
-"catch"
 "class"
 "const"
 "debugger"
-"delete"
 "export"
 "extends"
-"finally"
 "function"
 "get"
 "in"
 "instanceof"
 "let"
-"new"
 "return"
 "set"
 "static"
 "switch"
 "target"
-"throw"
-"try"
 "typeof"
 "var"
 "void"
 "with"
 "yield"
 ] @keyword
+
+[
+ "new"
+ "delete"
+] @keyword.operator
+
+[
+ "throw"
+ "try"
+ "catch"
+ "finally"
+] @exception

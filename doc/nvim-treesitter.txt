@@ -183,6 +183,9 @@ Supported options:
   EOF
 <
 
+Note: this makes use of the |CursorHold| event, so the highlight is
+triggered after 'updatetime'.
+
                               *nvim-treesitter-highlight-current-scope-submod*
 Highlight current scope~
 
@@ -549,7 +552,7 @@ nvim_treesitter#foldexpr()~
 Functions to be used to determine the fold level at a given line number.
 To use it: >
   set foldmethod=expr
-  set foldexpr=nvim_treesitter#foldexr()
+  set foldexpr=nvim_treesitter#foldexpr()
 <
 
 This will respect your 'foldnestmax' setting.
@@ -732,6 +735,14 @@ Literal text.
 `TSURI`
                                                                     *hl-TSURI*
 Any URI like a link or email.
+
+`TSVariable`
+                                                               *hl-TSVariable*
+Any variable name that does not have another highlight.
+
+`TSVariableBuiltin`
+                                                        *hl-TSVariableBuiltin*
+Variable names that are defined by the languages, like `this` or `self`.
 
 ==============================================================================
 MODULE-HIGHLIGHTS                          *nvim-treesitter-module-highlights*

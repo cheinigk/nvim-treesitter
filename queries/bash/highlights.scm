@@ -14,6 +14,10 @@
  ] @punctuation.delimiter
 
 [
+ "$"
+] @punctuation.special
+
+[
  ">"
  "<"
  "&"
@@ -30,6 +34,8 @@
  (raw_string)
  (heredoc_body)
 ] @string
+
+(variable_assignment (word) @string)
 
 [
  "if"
@@ -57,13 +63,10 @@
  "unset"
  ] @keyword
 
-[
- (special_variable_name)
- ("$" (special_variable_name))
- ] @constant
+(special_variable_name) @constant
 
-((word) @constant
-  (#vim-match? @constant "SIG(INT|TERM|QUIT|TIN|TOU|STP|HUP)"))
+((word) @constant.builtin
+ (#vim-match? @constant.builtin "SIG(INT|TERM|QUIT|TIN|TOU|STP|HUP)"))
 
 ((word) @boolean
   (#vim-match? @boolean "true|false"))
@@ -81,7 +84,10 @@
 (function_definition
   name: (word) @function)
 
-(command_name (word)) @function
+(command_name (word) @function)
+
+((command_name (word) @function.builtin)
+ (#match? @function.builtin "^(cd|echo|eval|exit|getopts|pushd|popd|return|set|shift)$"))
 
 (command
   argument: [
@@ -95,16 +101,15 @@
   descriptor: (file_descriptor) @operator
   destination: (word) @parameter)
 
-
-("$" (variable_name)) @identifier
-
 (expansion
   [ "${" "}" ] @punctuation.bracket)
 
-(variable_name) @identifier
+(variable_name) @variable
+
+((variable_name) @constant
+ (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 (case_item
   value: (word) @parameter)
 
 (concatenation (word) @parameter)
-

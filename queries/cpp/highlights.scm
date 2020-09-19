@@ -48,6 +48,8 @@
         name: (identifier) @constructor))
  (#match? @constructor "^[A-Z]"))
 
+(operator_name) @function
+
 (call_expression
   function: (scoped_identifier
               name: (identifier) @function))
@@ -75,7 +77,7 @@
 
 ; Constants
 
-(this) @constant.builtin
+(this) @variable.builtin
 (nullptr) @constant
 
 (true) @boolean
@@ -99,13 +101,11 @@
  "class"
  "decltype"
  "constexpr"
- "delete"
  "explicit"
  "final"
  "friend"
  "mutable"
  "namespace"
- "new"
  "override"
  "private"
  "protected"
@@ -117,11 +117,31 @@
  (auto)
 ] @keyword
 
+[
+ "new"
+ "delete"
+
+ ;; these keywords are not supported by the parser
+ ;"eq"
+ ;"not_eq"
+ ;
+ ;"compl"
+ ;"and"
+ ;"or"
+ ;
+ ;"bitand"
+ ;"bitand_eq"
+ ;"bitor"
+ ;"bitor_eq"
+ ;"xor"
+ ;"xor_eq"
+] @keyword.operator
+
 "::" @operator
 "..." @operator
 
 ; Annotations (not fully supported by parser)
 
-((ERROR) @annotation 
-         (vim-match? @annotation  "\[?\[.*\]\]?.*$"))
-(attribute) @annotation
+((ERROR) @attribute
+         (vim-match? @attribute  "\[?\[.*\]\]?.*$"))
+(attribute) @attribute

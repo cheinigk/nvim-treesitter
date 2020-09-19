@@ -13,15 +13,12 @@ local query_cache = caching.create_buffer_cache()
 M.base_language_map = {
   cpp = {'c'},
   typescript = {'javascript'},
-  tsx = {'typescript', 'javascript'},
+  javascript = {'jsx'},
+  tsx = {'typescript', 'javascript', 'jsx'},
+  ocaml_interface = {'ocaml'},
 }
 
-M.query_extensions = {
-  javascript = { 'jsx' },
-  tsx = {'jsx'}
-}
-
-M.built_in_query_groups = {'highlights', 'locals', 'textobjects', 'fold'}
+M.built_in_query_groups = {'highlights', 'locals', 'textobjects', 'folds'}
 
 -- Creates a function that checks whether a certain query exists
 -- for a specific language.
@@ -82,17 +79,16 @@ local function filtered_runtime_queries(lang, query_name)
   return filter_files(api.nvim_get_runtime_file(string.format('queries/%s/%s.scm', lang, query_name), true) or {})
 end
 
+local function runtime_query_exists(lang, query_name)
+  local files = api.nvim_get_runtime_file(string.format('queries/%s/%s.scm', lang, query_name), false)
+  return files and #files > 0
+end
+
 local function get_query_files(lang, query_name)
   local query_files = {}
-  local extensions = M.query_extensions[lang] or {}
 
   local lang_files = filtered_runtime_queries(lang, query_name)
   vim.list_extend(query_files, lang_files)
-
-  for _, ext_lang in ipairs(extensions) do
-    local ext_files = filtered_runtime_queries(ext_lang, query_name)
-    vim.list_extend(query_files, ext_files)
-  end
 
   for _, base_lang in ipairs(M.base_language_map[lang] or {}) do
     local base_files = filtered_runtime_queries(base_lang, query_name)
@@ -103,9 +99,16 @@ local function get_query_files(lang, query_name)
 end
 
 function M.has_query_files(lang, query_name)
-  local query_files = get_query_files(lang, query_name)
+  local langs = {lang}
+  vim.list_extend(langs, M.base_language_map[lang] or {})
 
-  return #query_files > 0
+  for _, lang in ipairs(langs) do
+    if runtime_query_exists(lang, query_name) then
+      return true
+    end
+  end
+
+  return false
 end
 
 function M.get_query(lang, query_name)
@@ -234,13 +237,13 @@ end
 -- @param root the root node
 function M.iter_group_results(bufnr, query_group, root)
   local lang = parsers.get_buf_lang(bufnr)
-  if not lang then return end
+  if not lang then return function() end end
 
   local query = M.get_query(lang, query_group)
-  if not query then return end
+  if not query then return function() end end
 
   local parser = parsers.get_parser(bufnr, lang)
-  if not parser then return end
+  if not parser then return function() end end
 
   local root = root or parser:parse():root()
   local start_row, _, end_row, _ = root:range()

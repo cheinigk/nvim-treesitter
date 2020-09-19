@@ -1,11 +1,9 @@
 (
-    (comment)* @definition.doc
     (function_declaration
         name: (identifier) @definition.function) ;@function 
 )
 
 (
-    (comment)* @definition.doc
     (method_declaration
         name: (field_identifier) @definition.method); @method
 )
@@ -41,24 +39,24 @@
 
 ;; Call references
 ((call_expression
-   function: (identifier) @reference) @call
+   function: (identifier) @reference)
  (set! reference.kind "call" ))
 
 ((call_expression
     function: (selector_expression
-                field: (field_identifier) @reference)) @call
+                field: (field_identifier) @reference))
  (set! reference.kind "call" ))
 
 
 ((call_expression
     function: (parenthesized_expression
-                (identifier) @reference)) @call
+                (identifier) @reference))
  (set! reference.kind "call" ))
 
 ((call_expression
    function: (parenthesized_expression
                (selector_expression
-                 field: (field_identifier) @reference))) @call
+                 field: (field_identifier) @reference)))
  (set! reference.kind "call" ))
 
 ;; Scopes

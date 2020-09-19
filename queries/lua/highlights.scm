@@ -51,15 +51,19 @@
 ] @keyword
 
 ;; Operators
+
+[
+ "not"
+ "and"
+ "or"
+] @keyword.operator
+
 [
 "="
 "~="
 "=="
 "<="
 ">="
-"not"
-"and"
-"or"
 "<"
 ">"
 "+"
@@ -91,6 +95,9 @@
  "}"
 ] @punctuation.bracket
 
+;; Variables
+(identifier) @variable
+
 ;; Constants
 [
 (false)
@@ -100,9 +107,13 @@
 (spread) @constant ;; "..."
 
 ;; Functions
-("function" @keyword.function
- [(function_name) (identifier)] @function
- "end" @keyword.function)
+(function [(function_name) (identifier)] @function)
+(function ["function" "end"] @keyword.function)
+
+(local_function [(function_name) (identifier)] @function)
+(local_function ["function" "end"] @keyword.function)
+
+(function_definition ["function" "end"] @keyword.function)
 
 (property_identifier) @property
 (method) @method

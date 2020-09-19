@@ -1,14 +1,38 @@
-[![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://nvim-treesitter.zulipchat.com/)
-[![Linting and style](https://github.com/nvim-treesitter/nvim-treesitter/workflows/Linting%20and%20style%20checking/badge.svg?branch=master)](https://github.com/nvim-treesitter/nvim-treesitter/actions?query=workflow%3A%22Linting+and+style+checking%22+branch%3Amaster)
-[![Syntax files](https://github.com/nvim-treesitter/nvim-treesitter/workflows/Check%20loading%20of%20syntax%20files/badge.svg)](https://github.com/nvim-treesitter/nvim-treesitter/actions?query=workflow%3A%22Check+loading+of+syntax+files%22+branch%3Amaster)
+<div align="center">
+  <h1>nvim-treesitter</h1>
+  <p>
+    <a href="https://nvim-treesitter.zulipchat.com/">
+      <img alt="Zulip Chat" src="https://img.shields.io/badge/zulip-join_chat-brightgreen.svg" />
+    </a>
+    <a href="https://github.com/nvim-treesitter/nvim-treesitter/actions?query=workflow%3A%22Linting+and+style+checking%22+branch%3Amaster">
+      <img alt="Linting and Style" src="https://github.com/nvim-treesitter/nvim-treesitter/workflows/Linting%20and%20style%20checking/badge.svg" />
+    </a>
+    <a href="https://github.com/nvim-treesitter/nvim-treesitter/actions?query=workflow%3A%22Check+loading+of+syntax+files%22+branch%3Amaster">
+      <img alt="Syntax files" src="https://github.com/nvim-treesitter/nvim-treesitter/workflows/Check%20loading%20of%20syntax%20files/badge.svg" />
+    </a>
+  </p>
+</div>
 
-# nvim-treesitter
+<div align="center">
+  <p>
+    <img src="assets/logo.png" align="center" alt="Logo" />
+  </p>
+  <p>
+    <a href="https://github.com/tree-sitter/tree-sitter">Treesitter</a>
+    configurations and abstraction layer for
+    <a href="https://github.com/neovim/neovim/">Neovim</a>.
+  </p>
+  <p>
+    <i>
+      Logo by <a href="https://github.com/steelsojka">@steelsojka</a>
+    </i>
+  </p>
+</div>
 
-Treesitter configurations and abstraction layer for Neovim.
-
-![Nvim-treesitter](nvim-treesitter.png)
+![cpp example](assets/example-cpp.png)
 
 Traditional highlighting (left) vs Treesitter-based highlighting (right).
+See more examples in [our gallery](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Gallery).
 
 **Warning: Treesitter and Treesitter highlighting are an experimental feature of nightly versions of Neovim.
 Please consider the experience with this plug-in as experimental until Neovim 0.5 is released!**
@@ -360,6 +384,7 @@ List of currently supported languages:
 - [ ] [markdown](https://github.com/ikatyang/tree-sitter-markdown)
 - [ ] [nix](https://github.com/cstrahan/tree-sitter-nix)
 - [x] [ocaml](https://github.com/tree-sitter/tree-sitter-ocaml) (maintained by @undu)
+- [x] [ocaml_interface](https://github.com/tree-sitter/tree-sitter-ocaml) (maintained by @undu)
 - [x] [php](https://github.com/tree-sitter/tree-sitter-php) (maintained by @tk-shirasaka)
 - [x] [python](https://github.com/tree-sitter/tree-sitter-python) (maintained by @stsewd, @theHamsta)
 - [x] [Tree-sitter query language](https://github.com/nvim-treesitter/tree-sitter-query) (maintained by @steelsojka)
@@ -459,6 +484,10 @@ If you do, it's highly possible that this is the cause of the problem.
 If everything is okay, then it might be an actual error.
 
 In both cases, feel free to [open an issue here](https://github.com/nvim-treesitter/nvim-treesitter/issues/new/choose).
+
+## I get `module 'vim.treesitter.query' not found`
+
+Make sure you have the latest nightly version of Neovim.
 
 ## I get `Error detected while processing .../plugin/nvim-treesitter.vim` every time I open Neovim
 
