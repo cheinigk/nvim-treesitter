@@ -5,20 +5,143 @@ local luv = vim.loop
 local utils = require'nvim-treesitter.utils'
 local parsers = require'nvim-treesitter.parsers'
 local info = require'nvim-treesitter.info'
+local configs = require'nvim-treesitter.configs'
 
 local M = {}
+local lockfile = {}
+
+M.compilers = { vim.fn.getenv('CC'), "cc", "gcc", "clang" }
+
+local started_commands = 0
+local finished_commands = 0
+local failed_commands = 0
+
+local function reset_progress_counter()
+  if started_commands ~= finished_commands then
+    return
+  end
+  started_commands = 0
+  finished_commands = 0
+  failed_commands = 0
+end
+
+local function get_job_status()
+  return "["..finished_commands.."/"..started_commands
+            ..(failed_commands > 0 and ", failed: "..failed_commands or "").."]"
+end
+
+local function get_revision(lang)
+  if #lockfile == 0 then
+    lockfile = vim.fn.json_decode(vim.fn.readfile(utils.join_path(utils.get_package_path(), 'lockfile.json')))
+  end
+  return (lockfile[lang] and lockfile[lang].revision)
+end
+
+local function select_rm_file_cmd(file, info_msg)
+  if fn.has('win32') == 1 then
+    return {
+      cmd = 'cmd',
+      opts = {
+        args = { '/C', 'if', 'exist', file, 'del', file },
+      },
+      info = info_msg,
+      err = "Could not delete "..file,
+    }
+  else
+    return {
+      cmd = 'rm',
+      opts = {
+        args = { file },
+      },
+      info = info_msg,
+      err = "Could not delete "..file,
+    }
+  end
+end
 
 function M.iter_cmd(cmd_list, i, lang, success_message)
   if i == #cmd_list + 1 then return print(success_message) end
 
   local attr = cmd_list[i]
   if attr.info then print(attr.info) end
+=======
+local configs = require'nvim-treesitter.configs'
+
+local M = {}
+local lockfile = {}
+
+M.compilers = { vim.fn.getenv('CC'), "cc", "gcc", "clang" }
+
+local started_commands = 0
+local finished_commands = 0
+local failed_commands = 0
+
+local function reset_progress_counter()
+  if started_commands ~= finished_commands then
+    return
+  end
+  started_commands = 0
+  finished_commands = 0
+  failed_commands = 0
+end
+
+local function get_job_status()
+  return "["..finished_commands.."/"..started_commands
+            ..(failed_commands > 0 and ", failed: "..failed_commands or "").."]"
+end
+
+local function get_revision(lang)
+  if #lockfile == 0 then
+    lockfile = vim.fn.json_decode(vim.fn.readfile(utils.join_path(utils.get_package_path(), 'lockfile.json')))
+  end
+  return (lockfile[lang] and lockfile[lang].revision)
+end
+
+local function select_rm_file_cmd(file, info_msg)
+  if fn.has('win32') == 1 then
+    return {
+      cmd = 'cmd',
+      opts = {
+        args = { '/C', 'if', 'exist', file, 'del', file },
+      },
+      info = info_msg,
+      err = "Could not delete "..file,
+    }
+  else
+    return {
+      cmd = 'rm',
+      opts = {
+        args = { file },
+      },
+      info = info_msg,
+      err = "Could not delete "..file,
+    }
+  end
+end
+
+function M.iter_cmd(cmd_list, i, lang, success_message)
+  if i == 1 then
+    started_commands = started_commands + 1
+  end
+  if i == #cmd_list + 1 then
+    finished_commands = finished_commands + 1
+    return print(get_job_status().." "..success_message)
+  end
+
+  local attr = cmd_list[i]
+  if attr.info then print(get_job_status().." "..attr.info) end
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
 
   local handle
 
   handle = luv.spawn(attr.cmd, attr.opts, vim.schedule_wrap(function(code)
     handle:close()
     if code ~= 0 then
+<<<<<<< HEAD
+=======
+      failed_commands = failed_commands + 1
+      finished_commands = finished_commands + 1
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
       return api.nvim_err_writeln(attr.err or ("Failed to execute the following command:\n"..vim.inspect(attr)))
     end
     M.iter_cmd(cmd_list, i + 1, lang, success_message)
@@ -52,7 +175,13 @@ local function iter_cmd_sync(cmd_list)
     local ret = vim.fn.system(get_command(cmd))
     if vim.v.shell_error ~= 0 then
       print(ret)
+<<<<<<< HEAD
       api.nvim_err_writeln((cmd.err..'\n' or '').."Failed to execute the following command:\n"..vim.inspect(cmd))
+=======
+      api.nvim_err_writeln((cmd.err and cmd.err..'\n' or '')
+                          .."Failed to execute the following command:\n"
+                          ..vim.inspect(cmd))
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
       return false
     end
 
@@ -100,20 +229,96 @@ local function select_install_rm_cmd(cache_folder, project_name)
   end
 end
 
+<<<<<<< HEAD
 local function select_mv_cmd(compile_location, parser_lib_name)
+=======
+local function select_mv_cmd(from, to, cwd)
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
   if fn.has('win32') == 1 then
     return {
       cmd = 'cmd',
       opts = {
+<<<<<<< HEAD
         args = { '/C', 'move', '/Y', compile_location..'\\parser.so', parser_lib_name },
+=======
+        args = { '/C', 'move', '/Y', from, to },
+        cwd = cwd,
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
       }
     }
   else
     return {
       cmd = 'mv',
       opts = {
+<<<<<<< HEAD
         args = { compile_location..'/parser.so', parser_lib_name }
       }
+=======
+        args = { from, to },
+        cwd = cwd,
+      },
+    }
+  end
+end
+
+local function select_download_commands(repo, project_name, cache_folder, revision)
+  if vim.fn.executable('unzip') == 1 and vim.fn.executable('curl') == 1 and repo.url:find("github.com", 1, true) then
+
+    revision = revision or repo.branch or "master"
+    local path_sep = utils.get_path_sep()
+    return {
+      select_install_rm_cmd(cache_folder, project_name..'-tmp'),
+      {
+        cmd = 'curl',
+        info = 'Downloading...',
+        err = 'Error during download, please verify your internet connection',
+        opts = {
+          args = {
+            '-L', -- follow redirects
+            repo.url.."/archive/"..revision..".zip",
+            '--output',
+            project_name..".zip"
+          },
+          cwd = cache_folder,
+        },
+      },
+      {
+        cmd = 'unzip',
+        info = 'Extracting...',
+        err = 'Error during unzipping',
+        opts = {
+          args = {
+            '-o',
+            project_name..".zip",
+            '-d',
+            project_name..'-tmp',
+          },
+          cwd = cache_folder,
+        },
+      },
+      select_rm_file_cmd(cache_folder..path_sep..project_name..".zip"),
+      select_mv_cmd(utils.join_path(project_name..'-tmp', repo.url:match('[^/]-$')..'-'..revision),
+                    project_name,
+                    cache_folder),
+      select_install_rm_cmd(cache_folder, project_name..'-tmp')
+    }
+  else
+    return {
+      cmd = 'git',
+      info = 'Downloading...',
+      err = 'Error during download, please verify your internet connection',
+      opts = {
+        args = {
+          'clone',
+          '--single-branch',
+          '--branch', repo.branch or 'master',
+          '--depth', '1',
+          repo.url,
+          project_name
+        },
+        cwd = cache_folder,
+      },
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     }
   end
 end
@@ -128,6 +333,7 @@ local function run_install(cache_folder, install_folder, lang, repo, with_sync)
   local compile_location = cache_folder..path_sep..(repo.location or project_name)
   local parser_lib_name = install_folder..path_sep..lang..".so"
 
+<<<<<<< HEAD
   local compilers = { "cc", "gcc", "clang" }
   local cc = select_executable(compilers)
   if not cc then
@@ -146,6 +352,21 @@ local function run_install(cache_folder, install_folder, lang, repo, with_sync)
         cwd = cache_folder,
       },
     },
+=======
+  local cc = select_executable(M.compilers)
+  if not cc then
+    api.nvim_err_writeln('No C compiler found! "'
+                       ..table.concat(vim.tbl_filter(function(c) return type(c) == 'string' end, M.compilers), '", "')
+                       ..'" are not executable.')
+    return
+  end
+  local revision = configs.get_update_strategy() == 'lockfile' and get_revision(lang)
+
+  local command_list = {}
+  vim.list_extend(command_list, { select_install_rm_cmd(cache_folder, project_name) })
+  vim.list_extend(command_list, select_download_commands(repo, project_name, cache_folder, revision))
+  vim.list_extend(command_list, {
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     {
       cmd = cc,
       info = 'Compiling...',
@@ -155,9 +376,15 @@ local function run_install(cache_folder, install_folder, lang, repo, with_sync)
         cwd = compile_location
       }
     },
+<<<<<<< HEAD
     select_mv_cmd(compile_location, parser_lib_name),
     select_install_rm_cmd(cache_folder, project_name)
   }
+=======
+    select_mv_cmd('parser.so', parser_lib_name, compile_location),
+    select_install_rm_cmd(cache_folder, project_name)
+  })
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
 
   if with_sync then
     if iter_cmd_sync(command_list) == true then
@@ -195,7 +422,10 @@ end
 
 local function install(with_sync, ask_reinstall)
   return function (...)
+<<<<<<< HEAD
 
+=======
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     if fn.executable('git') == 0 then
       return api.nvim_err_writeln('Git is required on your system to run this command')
     end
@@ -216,6 +446,13 @@ local function install(with_sync, ask_reinstall)
       ask = ask_reinstall
     end
 
+<<<<<<< HEAD
+=======
+    if #languages > 1 then
+      reset_progress_counter()
+    end
+
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     for _, lang in ipairs(languages) do
       install_lang(lang, ask, cache_folder, install_folder, with_sync)
     end
@@ -223,6 +460,10 @@ local function install(with_sync, ask_reinstall)
 end
 
 function M.update(lang)
+<<<<<<< HEAD
+=======
+  reset_progress_counter()
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
   if lang then
     install(false, 'force')(lang)
   else
@@ -233,6 +474,7 @@ function M.update(lang)
   end
 end
 
+<<<<<<< HEAD
 local function select_uninstall_rm_cmd(lang, parser_lib)
   if fn.has('win32') == 1 then
     return {
@@ -255,6 +497,8 @@ local function select_uninstall_rm_cmd(lang, parser_lib)
   end
 end
 
+=======
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
 function M.uninstall(lang)
   local path_sep = '/'
   if fn.has('win32') == 1 then
@@ -262,6 +506,10 @@ function M.uninstall(lang)
   end
 
   if lang == 'all' then
+<<<<<<< HEAD
+=======
+    reset_progress_counter()
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     local installed = info.installed_parsers()
     for _, lang in pairs(installed) do
       M.uninstall(lang)
@@ -273,12 +521,44 @@ function M.uninstall(lang)
     local parser_lib = install_dir..path_sep..lang..".so"
 
     local command_list = {
+<<<<<<< HEAD
       select_uninstall_rm_cmd(lang, parser_lib)
+=======
+      select_rm_file_cmd(parser_lib, "Uninstalling parser for "..lang)
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
     }
     M.iter_cmd(command_list, 1, lang, 'Treesitter parser for '..lang..' has been uninstalled')
   end
 end
 
+<<<<<<< HEAD
+=======
+function M.write_lockfile(verbose)
+  local sorted_parsers = {}
+
+  for k, v in pairs(parsers.get_parser_configs()) do
+    table.insert(sorted_parsers, {name = k, parser = v})
+  end
+
+  table.sort(sorted_parsers, function(a, b) return a.name < b.name end)
+
+  for _, v in ipairs(sorted_parsers) do
+    -- I'm sure this can be done in aync way with iter_cmd
+    local sha = vim.split(vim.fn.systemlist('git ls-remote '..v.parser.install_info.url)[1], '\t')[1]
+    lockfile[v.name] = { revision = sha }
+    if verbose then
+      print(v.name..': '..sha)
+    end
+  end
+
+  if verbose then
+    print(vim.inspect(lockfile))
+  end
+  vim.fn.writefile(vim.fn.split(vim.fn.json_encode(lockfile), '\n'),
+                   utils.join_path(utils.get_package_path(), "lockfile.json"))
+end
+
+>>>>>>> b66b533ecdf40524176020cff514c0597c99df0b
 M.ensure_installed = install(false, false)
 
 M.commands = {
